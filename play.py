@@ -183,7 +183,7 @@ def frostbite_simple_model(monitor=False, render=True):
             x = F.relu(self.dense(x))
             return self.out(x)
 
-    model = Model(2)
+    model = Model(8)
 
     cur_states = [utils.reset(env)] * 4
     total_reward = 0
@@ -210,6 +210,7 @@ def frostbite_simple_model(monitor=False, render=True):
         total_reward += reward
 
     env.env.close()
+    print(total_reward)
 
 
 def test_reproducible_random_seed():
@@ -232,6 +233,26 @@ def test_reproducible_random_seed():
 
     env.env.close()
     print('all good :D')
+
+
+def distribution_of_reward():
+    """
+    Plot the distribution of reward for many random seeds
+    """
+    random_seeds = list(range(60))
+    reward_list = []
+
+    for i in random_seeds:
+        model = utils.SmallModel(i)
+        total_reward, all_actions = utils.evaluate_model(model, render=False)
+        reward_list.append(total_reward)
+        # print(total_reward)
+
+    fig, ax = plt.subplots()
+    ax.hist(reward_list)
+    plt.show()
+
+    print('best seed is {}'.format(np.argmax(np.array(reward_list))))
 
 
 if __name__ == "__main__":
