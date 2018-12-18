@@ -1,9 +1,11 @@
 import sys
 import time
+import matplotlib.pyplot as plt
 
 import gym
 from gym import wrappers
 
+import utils
 
 def cartpole_no_model():
     """
@@ -81,6 +83,31 @@ def frostbite_no_model_monitor():
             if done:
                 print("Episode finished after {} timesteps".format(t+1))
                 break
+
+    env.env.close()
+
+
+def show_frame_change():
+    """
+    Show image before and after preprocessing
+    """
+    env = gym.make('Frostbite-v4')
+    observation = env.reset()
+
+    state_before = env.render(mode='rgb_array')
+    state_after = utils.convert_state(state_before)
+
+    fig, axes = plt.subplots(1, 2)
+
+    axes[0].get_xaxis().set_visible(False)
+    axes[0].get_yaxis().set_visible(False)
+    axes[1].get_xaxis().set_visible(False)
+    axes[1].get_yaxis().set_visible(False)
+
+    axes[0].imshow(state_before)
+    axes[1].imshow(state_after)
+
+    plt.show()
 
     env.env.close()
 
