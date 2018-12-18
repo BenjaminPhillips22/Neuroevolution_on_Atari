@@ -60,15 +60,16 @@ def frostbite_no_model_monitor():
     Run and record output of frostbite.
     No model, just sample from action space for
     1 episodes, max frames per episode is _.
+    -v4 to make it deterministic.
     """
-    env = gym.make('Frostbite-v0')
-    env = wrappers.Monitor(env, 'v/ffrostbite-experiment-2')
+    env = gym.make('Frostbite-v4')
+    env = wrappers.Monitor(env, 'v/ffrostbite-experiment-' + str(time.time()))
 
     for i_episode in range(1):
 
         observation = env.reset()
 
-        for t in range(1200):
+        for t in range(200):
 
             # uncomment below to render while recording
             # env.render()
@@ -81,8 +82,8 @@ def frostbite_no_model_monitor():
                 print("Episode finished after {} timesteps".format(t+1))
                 break
 
-    # env.Monitor.close()
     env.env.close()
+
 
 if __name__ == "__main__":
     """
