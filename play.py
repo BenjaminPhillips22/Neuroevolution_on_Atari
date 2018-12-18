@@ -1,4 +1,5 @@
 import sys
+import cv2
 import time
 import matplotlib.pyplot as plt
 
@@ -94,6 +95,10 @@ def show_frame_change():
     env = gym.make('Frostbite-v4')
     observation = env.reset()
 
+    for i in range(75):
+        if i == 0: env.step(1)
+        env.step(0)
+
     state_before = env.render(mode='rgb_array')
     state_after = utils.convert_state(state_before)
 
@@ -108,6 +113,87 @@ def show_frame_change():
     axes[1].imshow(state_after)
 
     plt.show()
+
+    env.env.close()
+
+
+def test_cur_state():
+    """
+    Test if cur_state works they way we hope it does
+    """
+
+    def reset(env):
+        return convert_state(env.reset())
+
+    def convert_state(state):
+        return cv2.resize(cv2.cvtColor(state, cv2.COLOR_RGB2GRAY), (64, 64)) / 255.0
+
+    env = gym.make('Frostbite-v4')
+    
+    # observation = env.reset()
+    cur_states = [reset(env)] * 4
+    old_state = cur_states.copy()
+
+    for t in range(20):
+
+        action = env.action_space.sample()  # select action randomly
+        observation, reward, done, info = env.step(action)
+
+        # update current state
+        cur_states.pop(0)
+        new_frame = convert_state(observation)
+        cur_states.append(new_frame)
+
+        assert old_state[1:4] == cur_states[0:3]
+        old_state = cur_states.copy()
+
+    env.env.close()
+    print('all good :)')
+
+
+def frostbite_simple_model(monitor=False, render=True):
+    """
+    Try getting a simple model to run
+    """
+
+    def reset(env):
+        return convert_state(env.reset())
+
+    def convert_state(state):
+        return cv2.resize(cv2.cvtColor(state, cv2.COLOR_RGB2GRAY), (64, 64)) / 255.0
+
+    env = gym.make('Frostbite-v4')
+    if monitor:
+        env = wrappers.Monitor(env, 'v/ffrostbite-experiment-' + str(time.time()))
+
+    # simple model....
+
+    
+    # observation = env.reset()
+    cur_states = [reset(env)] * 4
+    total_reward = 0
+    total_frames = 0
+
+    for t in range(200):
+
+        total_frames += 4
+
+        #  model output
+        # values = model(Variable(torch.Tensor([cur_states])))[0] 
+        # action = np.argmax(values.data.numpy()[:env.action_space.n])
+        # print(action)
+        
+        if render:
+            env.render()
+            time.sleep(0.05)
+
+        # action = env.action_space.sample()  # select action randomly
+        observation, reward, done, info = env.step(action)
+
+        # update current state
+        cur_states.pop(0)
+        new_frame = convert_state(observation)
+        cur_states.append(new_frame)
 
     env.env.close()
 
