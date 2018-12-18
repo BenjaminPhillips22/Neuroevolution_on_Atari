@@ -121,17 +121,10 @@ def test_cur_state():
     """
     Test if cur_state works they way we hope it does
     """
-
-    def reset(env):
-        return convert_state(env.reset())
-
-    def convert_state(state):
-        return cv2.resize(cv2.cvtColor(state, cv2.COLOR_RGB2GRAY), (64, 64)) / 255.0
-
     env = gym.make('Frostbite-v4')
     
     # observation = env.reset()
-    cur_states = [reset(env)] * 4
+    cur_states = [utils.reset(env)] * 4
     old_state = cur_states.copy()
 
     for t in range(20):
@@ -141,7 +134,7 @@ def test_cur_state():
 
         # update current state
         cur_states.pop(0)
-        new_frame = convert_state(observation)
+        new_frame = utils.convert_state(observation)
         cur_states.append(new_frame)
 
         assert old_state[1:4] == cur_states[0:3]
@@ -194,6 +187,7 @@ def frostbite_simple_model(monitor=False, render=True):
         cur_states.pop(0)
         new_frame = convert_state(observation)
         cur_states.append(new_frame)
+        total_reward += reward
 
     env.env.close()
 
