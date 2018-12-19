@@ -38,7 +38,7 @@ class RSModel():
         env = gym.make(self.env_name)
 
         if monitor:
-            env = wrappers.Monitor(env, self.output_fname + str(time.time()))
+            env = wrappers.Monitor(env, self.output_fname)
 
         cur_states = [self.reset(env)] * 4
         total_reward = 0
