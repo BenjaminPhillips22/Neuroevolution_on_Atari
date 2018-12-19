@@ -18,7 +18,6 @@ def random_seed_generator(seed=2):
 
 def main():
 
-    my_seed = 33
     f_name = 'rs_frostbite.json'
 
     our_seeds = []
@@ -35,7 +34,7 @@ def main():
     start = time.time()
 
     # start the 'random' search!
-    for s in random_seed_generator(my_seed):
+    for s in random_seed_generator(info['seed']):
         
         m = rs_model.RSModel(seed=s, info=info)
         reward, frames = m.evaluate_model()

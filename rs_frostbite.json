@@ -2,7 +2,8 @@
     "name": "Ben's Cool json",
     "env": "Frostbite-v4",
     "max_frames": 20000,
-    "max_frames_per_episode": 2000,
+    "max_frames_per_episode": 2500,
     "output_fname": "v/frostbite-experiment-",
-    "model": "SmallModel"
+    "model": "SmallModel",
+    "seed": 33
 }

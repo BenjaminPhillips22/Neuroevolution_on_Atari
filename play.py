@@ -15,6 +15,7 @@ from gym import wrappers
 
 import utils
 
+
 def cartpole_no_model():
     """
     Run and render cartpole.
@@ -253,6 +254,24 @@ def distribution_of_reward():
     plt.show()
 
     print('best seed is {}'.format(np.argmax(np.array(reward_list))))
+
+
+def convert_video():
+    """
+    check what the model "sees"
+    """
+    import imageio
+    fname = "C:/Users/ben/Documents/Projects/Neuroevolution_on_Atari/v/frostbite-experiment-1545199896.5494895/openaigym.video.0.5680.video000000.mp4"
+
+    reader = imageio.get_reader(fname)
+    fps = reader.get_meta_data()['fps']
+
+    writer = imageio.get_writer('model_view.mp4', fps=fps)
+
+    for im in reader:
+        writer.append_data(utils.convert_state(im))
+    writer.close()
+
 
 
 if __name__ == "__main__":
