@@ -18,7 +18,7 @@ def random_seed_generator(seed=2):
 
 def main():
 
-    seed = 3
+    my_seed = 33
     f_name = 'rs_frostbite.json'
 
     our_seeds = []
@@ -35,7 +35,7 @@ def main():
     start = time.time()
 
     # start the 'random' search!
-    for s in random_seed_generator(seed):
+    for s in random_seed_generator(my_seed):
         
         m = rs_model.RSModel(seed=s, info=info)
         reward, frames = m.evaluate_model()
@@ -46,13 +46,13 @@ def main():
 
         elapsed = (time.time() - start)
         print("Time: " + str(round(elapsed)) +
-              ", Frames: " + str(total_frames))
+              ", Frames: " + str(total_frames), flush=True)
 
         if total_frames > info['max_frames']:
             break
 
     # get best seed
-    print('recording best network')
+    print('recording best network', flush=True)
     best_seed = our_seeds[np.argmax(our_rewards)]
     m = rs_model.RSModel(seed=best_seed, info=info)
     _, _ = m.evaluate_model(monitor=True)
