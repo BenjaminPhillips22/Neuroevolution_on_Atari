@@ -19,11 +19,11 @@ import models
 
 class RSModel():
 
-    def __init__(self, seed, info):
-        self.env_name = info['env']
-        self.max_frames_per_episode = info['max_frames_per_episode']
-        self.output_fname = info['output_fname']
-        self.model_type = info['model']
+    def __init__(self, seed, config):
+        self.env_name = config['env']
+        self.max_frames_per_episode = config['max_frames_per_episode']
+        self.output_fname = config['output_fname']
+        self.model_type = config['model']
         # below is equivalent to models.SmallModel(seed)
         self.model = getattr(models, self.model_type)(seed)
 
@@ -37,12 +37,15 @@ class RSModel():
 
         env = gym.make(self.env_name)
 
-        if monitor:
-            env = wrappers.Monitor(env, self.output_fname)
-
         cur_states = [self.reset(env)] * 4
         total_reward = 0
         total_frames = 0
+        old_lives = env.env.ale.lives()
+
+        if monitor:
+            env = wrappers.Monitor(env, self.output_fname)
+
+        env.reset()
 
         for t in range(self.max_frames_per_episode):
 
@@ -51,12 +54,24 @@ class RSModel():
             #  model output
             values = self.model(Variable(torch.Tensor([cur_states])))[0]
             action = np.argmax(values.data.numpy()[:env.action_space.n])
-            observation, reward, done, info = env.step(action)
+            observation, reward, done, _ = env.step(action)
 
             # update current state
             total_reward += reward
-            if done:
-                break
+
+            if monitor:
+                new_lives = env.env.env.ale.lives()
+                if old_lives < new_lives:
+                    break
+            else:
+                new_lives = env.env.ale.lives()
+                if old_lives < new_lives:
+                    break
+            old_lives = new_lives
+
+            # unfortunately this isn't working.
+            # if done:
+            #     break
             cur_states.pop(0)
             new_frame = self.convert_state(observation)
             cur_states.append(new_frame)

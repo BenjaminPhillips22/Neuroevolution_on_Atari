@@ -273,6 +273,90 @@ def convert_video():
     writer.close()
 
 
+def run_sequentially():
+    """
+    Run some models sequentially and time it.
+    For comparison with multiprocesses
+    Sequential Time: 488
+    ~ 8 min
+    """
+    import time
+    import rs_model
+    import json
+
+    # start timing
+    start = time.time()
+
+    f_name = 'rs_frostbite.json'
+
+    our_seeds = []
+    our_rewards = []
+
+    with open(f_name) as f:
+        config = json.load(f)
+
+    # start the 'random' search!
+    for s in range(60):
+        
+        m = rs_model.RSModel(seed=s, config=config)
+        reward, frames = m.evaluate_model()
+        
+        our_seeds.append(s)
+        our_rewards.append(reward)
+
+    elapsed = (time.time() - start)
+    print("Sequential Time: " + str(round(elapsed)))
+
+
+def run_nonsequentially():
+    """
+    Run some models with multiprocessing.
+    For comparison with 'run_sequentially'
+    """
+    import time
+    import rs_model
+    import json
+    import pandas as pd
+    from multiprocessing import Queue, Process
+
+    # start timing
+    start = time.time()
+
+    f_name = 'rs_frostbite.json'
+
+    our_seeds = []
+    our_rewards = []
+
+    with open(f_name) as f:
+        config = json.load(f)
+
+    def get_rewards(queue, seed, config):
+        import rs_model
+        m = rs_model.RSModel(seed=s, config=config)
+        reward, frames = m.evaluate_model()
+        queue.put([seed, reward])
+
+    q = Queue()
+    processes = []
+    our_seeds = []
+    our_rewards = []
+    for s in range(60):
+        p = Process(target=get_rewards, args=(q, s, config))
+        processes.append(p)
+        p.start()
+    for p in processes:
+        seed, reward = q.get()  # will block
+        our_seeds.append(seed)
+        our_rewards.append(reward)
+    for p in processes:
+        p.join()
+
+    elapsed = (time.time() - start)
+    print("Non Sequential Time: " + str(round(elapsed)))
+
+    df = pd.DataFrame({'seed': our_seeds, 'reward': our_rewards})
+    print(df)
+
 
 if __name__ == "__main__":
     """

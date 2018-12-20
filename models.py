@@ -19,6 +19,15 @@ class SmallModel(nn.Module):
         self.dense = nn.Linear(1152, 64)
         self.out = nn.Linear(64, 18)
 
+        self.add_tensors = {}
+        for name, tensor in self.named_parameters():
+            if tensor.size() not in self.add_tensors:
+                self.add_tensors[tensor.size()] = torch.Tensor(tensor.size())
+            if 'weight' in name:
+                nn.init.kaiming_normal_(tensor)
+            else:
+                tensor.data.zero_()
+
     def forward(self, x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
