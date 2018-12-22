@@ -296,7 +296,7 @@ def run_sequentially():
         config = json.load(f)
 
     # start the 'random' search!
-    for s in range(60):
+    for s in range(6):
         
         m = rs_model.RSModel(seed=s, config=config)
         reward, frames = m.evaluate_model()

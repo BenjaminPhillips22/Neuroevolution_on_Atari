@@ -1,28 +1,7 @@
 import unittest
-import json
-
-import cv2
-import time
-import random
-import numpy as np
-import matplotlib.pyplot as plt
-
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
-import torch.nn.functional as F
-
-import gym
-from gym import wrappers
-
-import matplotlib.pyplot as plt
-
-import models
 
 
-
-
-class TestMarkdownPy(unittest.TestCase):
+class RandomSearchTests(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -35,113 +14,98 @@ class TestMarkdownPy(unittest.TestCase):
 
     def test_the_tester(self):
         '''
-        testing the tester
+        Test if imported packages load
         '''
-        self.assertEqual(4*4, 16, 'something went wrong')
+        import json
+        import cv2
+        import time
+        import random
+        import numpy as np
+        import matplotlib.pyplot as plt
 
-    def test_return_seed(self):
+        import torch
+        import torch.nn as nn
+        from torch.autograd import Variable
+        import torch.nn.functional as F
+
+        import gym
+        from gym import wrappers
+
+    def test_random(self):
         """
-        Test if super works and get seed
+        check that we get the expected random number
         """
-        import models
+        import random
+        random.seed(111)
+        self.assertEqual(random.randint(0, 10000), 3485)
 
-        class RSModel1(models.SmallModel):
-            def __init__(self, seed, config):
-                super(self.__class__, self).__init__(seed)
-
-        m = RSModel1(8, 'fake config')
-        self.assertEqual(m.seed, 8, 'whats going on...')
-
-    def test_instance_of(self):
+    def test_torch_random(self):
         """
-        Test
+        Check torch gives us the expected random number
         """
-        import models
+        import torch
+        import numpy as np
+        torch.manual_seed(111)
+        a = torch.rand(1)
+        self.assertTrue(np.abs(a.numpy()[0] - 0.7155659) < 0.001)
 
-        class RSModel1(models.SmallModel):
-            def __init__(self, seed, config):
-                super(self.__class__, self).__init__(seed)
+    # def test_a1(self):
+    #     """
+    #     test if a small network gives us what we expect
+    #     """
+    #     import rs_tests.my_test_a1 as a1
+    #     import numpy as np
+    #     reward, frames = a1.main()
+    #     self.assertEqual(reward, 80)
+    #     # small variation in when done becomes True
+    #     j = np.abs(frames - 1604)
+    #     if j > 200:
+    #         print('a1 frames = ' + str(frames))
+    #     self.assertTrue(j < 200)
 
-        m = RSModel1(8, 'fake config')
-        self.assertIsInstance(m, models.SmallModel, 'whats going on...')
+    # def test_a2(self):
+    #     """
+    #     test if a small network gives us what we expect
+    #     when monitoring is True
+    #     """
+    #     import rs_tests.my_test_a2 as a2
+    #     import numpy as np
+    #     reward, frames = a2.main()
+    #     self.assertEqual(reward, 80)
+    #     # small variation in when done becomes True
+    #     j = np.abs(frames - 1604)
+    #     if j > 200:
+    #         print('a2 frames = ' + str(frames))
+    #     self.assertTrue(j < 200)
 
-    def test_getattr(self):
+    def test_b1(self):
         """
-        Test the get attribute function for defining a class
+        check with a big model if the reward is what we expect
         """
-        import models
+        import rs_tests.my_test_b1 as b1
+        import numpy as np
+        reward, frames = b1.main()
+        # self.assertEqual(reward, 0.0)
+        # small variation in when done becomes True
+        j = np.abs(frames - 14396)
+        if j > 200:
+            print('b1 frames = ' + str(frames))
+        self.assertTrue(j < 200)
 
-        class RSModel1(getattr(models, "SmallModel")):
-            def __init__(self, seed, config):
-                super(self.__class__, self).__init__(seed)
-
-        m = RSModel1(8, 'fake config')
-        self.assertIsInstance(m, models.SmallModel, 'whats going on...')
-
-    def leave_out_test_getting_reward(self):
-        """
-        fails now that I've changed how the model is defined
-        reward for seed 8 should be 40
-        """
-
-        class RSModel1():
-            def __init__(self, seed, config):
-                self.model = models.SmallModel(seed)
-                # self.things = config['things']
-
-            def convert_state(self, state):
-                return cv2.resize(cv2.cvtColor(state, cv2.COLOR_RGB2GRAY), (64, 64)) / 255.0
-
-            def reset(self, env):
-                return self.convert_state(env.reset())
-
-            def evaluate_model(self, episode_length=200, render=False):
-
-                env = gym.make('Frostbite-v4')
-
-                cur_states = [self.reset(env)] * 4
-                total_reward = 0
-                total_frames = 0
-
-                for t in range(episode_length):
-
-                    total_frames += 4
-
-                    if render:
-                        env.render()
-                        time.sleep(0.05)
-
-                    #  model output
-                    values = self.model(Variable(torch.Tensor([cur_states])))[0]
-                    action = np.argmax(values.data.numpy()[:env.action_space.n])
-                    observation, reward, done, info = env.step(action)
-
-                    # update current state
-                    total_reward += reward
-                    if done:
-                        break
-                    cur_states.pop(0)
-                    new_frame = self.convert_state(observation)
-                    cur_states.append(new_frame)
-
-                env.env.close()
-                return total_reward
-
-        m = RSModel1(8, 'fake config')
-        self.assertEqual(m.evaluate_model(), 40, 'reward doesnt match up')
-
-    def test_getattr_model_call(self):
-        """
-        a
-        """
-        import rs_model
-        f_name = 'rs_frostbite_test.json'
-        with open(f_name) as f:
-            config = json.load(f)
-
-        m = rs_model.RSModel(seed=8, config=config)
-
-        self.assertEqual(8, m.model.seed)
+    # def test_b2(self):
+    #     """
+    #     check with a big model if the reward is what we expect
+    #     when monitoring
+    #     """
+    #     import rs_tests.my_test_b2 as b2
+    #     import numpy as np
+    #     reward, frames = b2.main()
+    #     self.assertEqual(reward, 0.0)
+    #     # small variation in when done becomes True
+    #     j = np.abs(frames - 14396)
+    #     if j > 200:
+    #         print('b2 frames = ' + str(frames))
+    #     self.assertTrue(j < 200)
 
 
 if __name__ == '__main__':

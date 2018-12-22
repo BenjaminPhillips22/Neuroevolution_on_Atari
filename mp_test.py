@@ -3,7 +3,9 @@ import pickle
 import json
 from multiprocessing import Queue, Process, cpu_count
 import numpy as np
+import torch
 import rs_model
+
 
 def add_helper(queue, arg1, arg2):  # the func called in child processes
     # ret = arg1 + arg2
@@ -40,9 +42,10 @@ def pickle_t():
 
 
 def get_rewards(queue, seed, config):
-        m = rs_model.RSModel(seed=seed, config=config)
-        reward, frames = m.evaluate_model()
-        queue.put([seed, reward])
+    torch.set_num_threads(1)
+    m = rs_model.RSModel(seed=seed, config=config)
+    reward, frames = m.evaluate_model()
+    queue.put([seed, reward])
 
 
 def main():
