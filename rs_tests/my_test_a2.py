@@ -64,7 +64,7 @@ class RSModel():
     def reset(self, env):
         return self.convert_state(env.reset())
 
-def evaluate_model(self, monitor=False):
+    def evaluate_model(self, monitor=False):
 
         env = gym.make(self.env_name)
         env.seed(0)
