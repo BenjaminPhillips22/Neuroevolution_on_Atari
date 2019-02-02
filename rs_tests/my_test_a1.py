@@ -67,11 +67,12 @@ class RSModel():
     def evaluate_model(self, monitor=False):
 
         env = gym.make(self.env_name)
+        env.seed(0)
 
         cur_states = [self.reset(env)] * 4
         total_reward = 0
         total_frames = 0
-        # old_lives = env.env.ale.lives()
+        old_lives = env.env.ale.lives()
 
         if monitor:
             env = wrappers.Monitor(env, self.output_fname)
@@ -90,18 +91,22 @@ class RSModel():
             # update current state
             total_reward += reward
 
-            # if monitor:
-            #     new_lives = env.env.env.ale.lives()
-            #     if old_lives < new_lives:
-            #         break
-            # else:
-            #     new_lives = env.env.ale.lives()
-            #     if old_lives < new_lives:
-            #         break
-            # old_lives = new_lives
+            if monitor:
+                new_lives = env.env.env.ale.lives()
+                if old_lives < new_lives:
+                    break
+            else:
+                new_lives = env.env.ale.lives()
+                if old_lives < new_lives:
+                    break
+            old_lives = new_lives
 
-            # unfortunately this isn't working.
-            # this started working again.... (22-12-2018), and the above stopped working :(
+            # break if it's been one life and 0 reward
+            # need to be careful with this, it won't generalise to other games
+            if old_lives == 3:
+                if total_reward == 0:
+                    break
+            
             if done:
                 break
             cur_states.pop(0)
