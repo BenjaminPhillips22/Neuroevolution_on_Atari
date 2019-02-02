@@ -147,7 +147,7 @@ def main():
 
     q = Queue()
     processes = []
-    for s in range(6):
+    for s in range(60):
         p = Process(target=get_rewards, args=(q, s, config))
         processes.append(p)
         p.start()
