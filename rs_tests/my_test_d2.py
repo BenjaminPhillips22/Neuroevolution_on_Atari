@@ -140,7 +140,7 @@ def main():
     with open(f_name) as f:
         config = json.load(f)
     
-    config['output_fname'] = config['output_fname'] + '-c3-' + str(time.time())
+    config['output_fname'] = config['output_fname'] + '-d2-' + str(time.time())
 
     # start the 'random' search!
     for s in range(60):

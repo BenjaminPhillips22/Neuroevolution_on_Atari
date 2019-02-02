@@ -148,7 +148,7 @@ def main():
     with open(f_name) as f:
         config = json.load(f)
     
-    config['output_fname'] = config['output_fname'] + 'e1-' + str(time.time())
+    config['output_fname'] = config['output_fname'] + 'f2-' + str(time.time())
 
     q = Queue()
     processes = []
