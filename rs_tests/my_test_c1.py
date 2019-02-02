@@ -67,6 +67,7 @@ class RSModel():
     def evaluate_model(self, monitor=False):
 
         env = gym.make(self.env_name)
+        env.seed(0)
 
         cur_states = [self.reset(env)] * 4
         total_reward = 0
@@ -105,7 +106,7 @@ class RSModel():
             if old_lives == 3:
                 if total_reward == 0:
                     break
-
+            
             if done:
                 break
             cur_states.pop(0)

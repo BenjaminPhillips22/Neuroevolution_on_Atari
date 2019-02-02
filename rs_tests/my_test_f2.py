@@ -77,6 +77,7 @@ class RSModel():
     def evaluate_model(self, monitor=False):
 
         env = gym.make(self.env_name)
+        env.seed(0)
 
         cur_states = [self.reset(env)] * 4
         total_reward = 0
@@ -97,7 +98,7 @@ class RSModel():
             # torch.Tensor([cur_states]).
             # https://medium.com/@layog/a-comprehensive-overview-of-pytorch-7f70b061963f 
             values = self.model(Variable(torch.Tensor([cur_states]).cuda()))[0]
-            action = np.argmax(values.data.numpy()[:env.action_space.n])
+            action = np.argmax(values.data.cpu().numpy()[:env.action_space.n])
             observation, reward, done, _ = env.step(action)
 
             # update current state
