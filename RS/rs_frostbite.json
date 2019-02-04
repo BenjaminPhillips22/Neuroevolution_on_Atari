@@ -4,6 +4,5 @@
     "max_frames": 5000,
     "max_frames_per_episode": 2000,
     "output_fname": "v/frostbite-experiment-",
-    "model": "SmallModel",
     "seed": 332
 }
