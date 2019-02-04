@@ -1,7 +1,7 @@
+import os
 import json
 import time
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import random
 
@@ -18,48 +18,98 @@ def random_seed_generator(seed=2):
 
 def main():
 
-    f_name = 'rs_frostbite.json'
-
     our_seeds = []
     our_rewards = []
+    our_time = []
+    our_frames = []
+    our_ids = []
     total_frames = 0
 
+    # open json
+    f_name = 'rs_frostbite.json'
     with open(f_name) as f:
         config = json.load(f)
 
     # add time stamp to output_fname
     config['output_fname'] = config['output_fname'] + str(time.time())
 
+    # check if v/ exists, if not, create it
+    # if not os.path.exists('/v'):
+    #     os.mkdir('/v')
+    #     print('v directory created')
+
+    # creating a new folder
+    os.makedirs(config['output_fname'])
+
+    # save config
+    csv_path = config['output_fname'] + '/config.csv'
+    pd.DataFrame.from_dict(config, orient='index').to_csv(csv_path)
+
     # start timing
     start = time.time()
 
+    # set run seed
+    get_seed = random_seed_generator(config['run_seed'])
+
     # start the 'random' search!
-    for s in random_seed_generator(config['seed']):
-        
+    i = 0
+    while total_frames < config['max_frames']:
+
+        i += 1
+        s = next(get_seed)
         m = rs_model.RSModel(seed=s, config=config)
         reward, frames = m.evaluate_model()
-        
-        our_seeds.append(s)
-        our_rewards.append(reward)
-        total_frames += frames
 
         elapsed = (time.time() - start)
+
+        our_time.append(elapsed)
+        our_seeds.append(s)
+        our_rewards.append(reward)
+        our_frames.append(frames)
+        our_ids.append(i)
+        total_frames += frames
+
         print("Time: " + str(round(elapsed)) +
-              ", Frames: " + str(total_frames), flush=True)
+              ", Frames: " + str(total_frames) +
+              ", id: " + str(i),
+              ", seed: " + str(s) + 
+              ", percent: " + str(round(total_frames*100/config["max_frames"], 2)), flush=True)
 
-        if total_frames > config['max_frames']:
-            break
+        if i % 10 == 0:
+            max_r_index = np.argmax(our_rewards)
+            print('max reward: ', str(our_rewards[max_r_index]), ' seed: ', str(our_seeds[max_r_index]))
+        
+        if i % 10 == 0:
+            csv_path = config['output_fname'] + "/id_" + str(i) + '_results.csv'
+            pd.DataFrame(
+                {                
+                    'id': our_ids,
+                    'seed': our_seeds,
+                    'reward': our_rewards,
+                    'time': our_time,
+                    'frames': our_frames
+                }
+                ).to_csv(csv_path, index=False)
+            our_seeds = []
+            our_rewards = []
+            our_time = []
+            our_frames = []
+            our_ids = []
 
-    # get best seed
-    print('recording best network', flush=True)
-    best_seed = our_seeds[np.argmax(our_rewards)]
-    m = rs_model.RSModel(seed=best_seed, config=config)
-    _, _ = m.evaluate_model(monitor=True)
-
-    # save our results
-    # This will only work if the dir has been created above.
-    csv_path = config['output_fname'] + '/results.csv'
-    pd.DataFrame({'seed': our_seeds, 'reward': our_rewards}).to_csv(csv_path)
+    # save any last our results
+    if len(our_seeds) > 0:
+        csv_path = config['output_fname'] + "/id_" + str(i) + '_results.csv'
+        pd.DataFrame(
+            {
+                'id': our_ids,
+                'seed': our_seeds,
+                'reward': our_rewards,
+                'time': our_time,
+                'frames': our_frames
+            }
+            ).to_csv(csv_path, index=False)
+    elapsed = (time.time() - start)
+    print("Time: " + str(round(elapsed)))
 
     print('all finished :D')
 

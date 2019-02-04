@@ -12,7 +12,6 @@ import torch.nn.functional as F
 import gym
 from gym import wrappers
 
-import matplotlib.pyplot as plt
 
 import models
 
@@ -23,9 +22,7 @@ class RSModel():
         self.env_name = config['env']
         self.max_frames_per_episode = config['max_frames_per_episode']
         self.output_fname = config['output_fname']
-        self.model_type = config['model']
-        # below is equivalent to models.SmallModel(seed)
-        self.model = getattr(models, self.model_type)(seed)
+        self.model = models.BigModel(seed)
 
     def convert_state(self, state):
         return cv2.resize(cv2.cvtColor(state, cv2.COLOR_RGB2GRAY), (64, 64)) / 255.0
@@ -36,6 +33,7 @@ class RSModel():
     def evaluate_model(self, monitor=False):
 
         env = gym.make(self.env_name)
+        env.seed(0)
 
         cur_states = [self.reset(env)] * 4
         total_reward = 0
@@ -69,9 +67,14 @@ class RSModel():
                     break
             old_lives = new_lives
 
-            # unfortunately this isn't working.
-            # if done:
-            #     break
+            # break if it's been one life and 0 reward
+            # need to be careful with this, it won't generalise to other games
+            if old_lives == 3:
+                if total_reward == 0:
+                    break
+
+            if done:
+                break
             cur_states.pop(0)
             new_frame = self.convert_state(observation)
             cur_states.append(new_frame)
