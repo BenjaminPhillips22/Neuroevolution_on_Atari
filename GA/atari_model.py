@@ -2,10 +2,7 @@
 # 
 
 import cv2
-import time
-import random
 import numpy as np
-import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -15,12 +12,14 @@ import torch.nn.functional as F
 import gym
 from gym import wrappers
 
-
 import base_model
 
 
 class AtariModel():
-
+    """
+    Takes config which has atari game parameters.
+    Also takes seed_dict which is passed to BigModel.
+    """
     def __init__(self, seed_dict, config):
         self.env_name = config['env']
         self.max_frames_per_episode = config['max_frames_per_episode']
@@ -34,7 +33,9 @@ class AtariModel():
         return self.convert_state(env.reset())
 
     def evaluate_model(self, monitor=False):
-
+        """
+        outputs reward and frames. Can create an mp3 with monitor=True
+        """
         env = gym.make(self.env_name)
         env.seed(0)
 
