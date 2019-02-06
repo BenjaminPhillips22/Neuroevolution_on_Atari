@@ -106,10 +106,10 @@ class GATests(unittest.TestCase):
             else:
                 self.assertNotEqual(m1.seed_dict[name], m2.seed_dict[name])
 
-
     def test_mutation(self):
             '''
-            test mutation function is called properly within take_dna
+            test mutation function is called properly within take_dna.
+            Also, checks that id increments!
             '''
             f_name = 'ga_frostbite.json'
             with open(f_name) as f:
@@ -137,6 +137,8 @@ class GATests(unittest.TestCase):
 
             self.assertEqual(m1_initial_seed_dict['conv1.weight'][0], m1.seed_dict['conv1.weight'][0])
             self.assertEqual(len(m1.seed_dict['conv1.weight']), 2)
+
+            self.assertEqual(m1.id, 2)
 
 
 if __name__ == '__main__':
