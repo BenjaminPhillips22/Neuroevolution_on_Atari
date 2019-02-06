@@ -75,8 +75,7 @@ class GATests(unittest.TestCase):
 
     def test_crossover(self):
         '''
-        test that BigModel weights are the same and different
-        as I would expect.
+        test take_dna
         '''
         f_name = 'ga_frostbite.json'
         with open(f_name) as f:
@@ -108,7 +107,37 @@ class GATests(unittest.TestCase):
                 self.assertNotEqual(m1.seed_dict[name], m2.seed_dict[name])
 
 
+    def test_mutation(self):
+            '''
+            test mutation function is called properly within take_dna
+            '''
+            f_name = 'ga_frostbite.json'
+            with open(f_name) as f:
+                config = json.load(f)
 
-    
+            config['mutation_rate'] = 0.999
+
+            generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
+            m1 = compressed_model.CompressedModel(generator_dict, config)
+
+            generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
+            m2 = compressed_model.CompressedModel(generator_dict, config)
+            
+            self.assertEqual(m1.seed_dict, m2.seed_dict)
+
+            m1_initial_seed_dict = copy.deepcopy(m1.seed_dict)
+            
+            # set seed for 'take_dna'
+            random.seed(22)
+
+            m1.take_dna(m2)
+
+            # print(m1_initial_seed_dict)
+            # print(m1.seed_dict)
+
+            self.assertEqual(m1_initial_seed_dict['conv1.weight'][0], m1.seed_dict['conv1.weight'][0])
+            self.assertEqual(len(m1.seed_dict['conv1.weight']), 2)
+
+
 if __name__ == '__main__':
     unittest.main()
