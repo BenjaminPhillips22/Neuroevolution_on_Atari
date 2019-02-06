@@ -1,7 +1,7 @@
 # In GA folder
 
-import torch
 import random
+import copy
 
 import atari_model
 
@@ -18,7 +18,7 @@ class CompressedModel():
 
         self.id = next(self.gen_id)
 
-        self.mutation_rate = 1/24
+        self.mutation_rate = config['mutation_rate']
         self.seed_dict = {}
 
         layer_names = ['conv1.weight', 'conv2.weight', 'conv3.weight', 'dense.weight', 'out.weight']
@@ -33,11 +33,20 @@ class CompressedModel():
             if random.random() < self.mutation_rate:
                 self.seed_dict[name].append(next(self.gen_seed))
 
-    def take_dna(self, OtherCompressedModel):
+    def take_dna(self, OtherCompressedModel, mutate=True):
         """
         Perform crossover to create a child and update this
         CompressedModel's seed_dict
         """
+        for name in self.seed_dict.keys():
+            if random.random() < 0.5:
+                self.seed_dict[name] = copy.deepcopy(OtherCompressedModel.seed_dict[name])
+
+        if mutate:
+            self.mutate()
+
+        # update id
+        self.id = next(self.gen_id)
 
     def evaluate_compressed_model(self):
         """

@@ -13,10 +13,11 @@ class BigModel(nn.Module):
     using different seeds for different weight layers.
 
     """
-    def __init__(self, seed_dict):
+    def __init__(self, seed_dict, config):
         super().__init__()
 
         self.seed_dict = seed_dict
+        self.sigma = config['sigma']
 
         self.conv1 = nn.Conv2d(4, 32, (8, 8), 4)
         self.conv2 = nn.Conv2d(32, 64, (4, 4), 2)
@@ -37,7 +38,7 @@ class BigModel(nn.Module):
                     torch.manual_seed(s)
 
                     to_add = torch.Tensor(tensor.size()).data.zero_()
-                    to_add.normal_(0.0, 0.005)
+                    to_add.normal_(0.0, self.sigma)
 
                     tensor.data.add_(to_add)
 
