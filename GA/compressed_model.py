@@ -30,6 +30,7 @@ class CompressedModel():
         Given a small chance, add a random seed to a list of seeds
         """
         for name, _ in self.seed_dict.items():
+            random.seed(next(self.gen_seed))
             if random.random() < self.mutation_rate:
                 self.seed_dict[name].append(next(self.gen_seed))
 
