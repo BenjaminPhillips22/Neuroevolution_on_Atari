@@ -21,12 +21,12 @@ class AtariModel():
     Takes config which has atari game parameters.
     Also takes seed_dict which is passed to BigModel.
     """
-    def __init__(self, seed_dict, gen_seed, config):
-        self.gen_seed = gen_seed
+    def __init__(self, seed_dict, config):
+        self.get_seed = config['get_seed']
         self.env_name = config['env']
         self.max_frames_per_episode = config['max_frames_per_episode']
         self.output_fname = config['output_fname']
-        self.model = base_model.BigModel(seed_dict)
+        self.model = base_model.BigModel(seed_dict, config)
 
     def convert_state(self, state):
         return cv2.resize(cv2.cvtColor(state, cv2.COLOR_RGB2GRAY), (64, 64)) / 255.0
@@ -52,7 +52,7 @@ class AtariModel():
         env.reset()
 
         # implement random no-operations
-        random.seed(next(self.gen_seed))
+        random.seed(next(self.get_seed))
         noops = random.randint(0, max_noop)
         for _ in range(noops):
             observation, reward, done, _ = env.step(0)

@@ -10,11 +10,11 @@ class CompressedModel():
     """
     Used to evaluate the seed_dict and make babies
     """
-    def __init__(self, gen_dict, config):
+    def __init__(self, config):
 
         self.config = config
-        self.gen_seed = gen_dict['seed']
-        self.gen_id = gen_dict['id']
+        self.get_seed = config['get_seed']
+        self.gen_id = config['get_id']
 
         self.id = next(self.gen_id)
 
@@ -23,16 +23,16 @@ class CompressedModel():
 
         layer_names = ['conv1.weight', 'conv2.weight', 'conv3.weight', 'dense.weight', 'out.weight']
         for name in layer_names:
-            self.seed_dict[name] = [next(self.gen_seed)]
+            self.seed_dict[name] = [next(self.get_seed)]
 
     def mutate(self):
         """
         Given a small chance, add a random seed to a list of seeds
         """
         for name, _ in self.seed_dict.items():
-            random.seed(next(self.gen_seed))
+            random.seed(next(self.get_seed))
             if random.random() < self.mutation_rate:
-                self.seed_dict[name].append(next(self.gen_seed))
+                self.seed_dict[name].append(next(self.get_seed))
 
     def take_dna(self, OtherCompressedModel, mutate=True):
         """

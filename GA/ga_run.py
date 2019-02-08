@@ -8,6 +8,7 @@ import time
 import numpy as np
 import pandas as pd
 import random
+import pickle
 
 import compressed_model
 
@@ -57,11 +58,15 @@ def main():
     # start timing
     start = time.time()
 
-    # set run seed and create generators
-    generator_dict = {'id': id_generator(config['run_seed']), 'seed': random_seed_generator()}
+    # set run seed and add generators to config
+    config['get_id'] = id_generator()
+    config['get_seed'] = random_seed_generator(config['run_seed'])
 
     # create the population
-    population = [compressed_model.CompressedModel(generator_dict, config) for _ in range(config["population_size"])]
+    population = [compressed_model.CompressedModel(config) for _ in range(config["population_size"])]
+
+    # dict to store tournament winners
+    tournament_winning_seed_dicts = {}
 
     # start the 'GA' search!
     while total_frames < config['max_frames']:
@@ -72,19 +77,18 @@ def main():
         tournament_time = []
         tournament_frames = []
         tournament_ids = []
-        tournament_winning_seed_dicts = {}
-
+        
         # select individuals for tournament
-        random.seed(next(config['seed']))
+        random.seed(next(config['get_seed']))
         tournament_indices = random.sample(population=range(config['population_size']), k=config['tournament_size'])
 
         # get rewards
         for i in tournament_indices:
-            
+
             reward, frames = population[i].evaluate_compressed_model()
             tournament_rewards.append(reward)
             tournament_frames.append(frames)
-            
+
             # update total_frames
             total_frames += frames
 
@@ -96,14 +100,15 @@ def main():
 
             print("Time: " + str(round(elapsed)) +
                   ", Frames: " + str(total_frames) +
-                  ", id: " + str(population[i].id),
+                  ", id: " + str(population[i].id) +
+                  ", reward: " + str(reward) +
                   ", percent: " + str(round(total_frames*100/config["max_frames"], 2)), flush=True)
 
         # Who won the tournament?
         tournament_index_of_max_reward = np.argmax(tournament_rewards)
-        print("TOURNAMENT WINNER id: " +
-              str(tournament_ids[tournament_index_of_max_reward]) +
-              " reward: " + tournament_rewards[tournament_index_of_max_reward])
+        print("TOURNAMENT NUMBER " + str(tournament_number) +
+              ", winning id: " + str(tournament_ids[tournament_index_of_max_reward]) +
+              ", reward: " + str(tournament_rewards[tournament_index_of_max_reward]), flush=True)
 
         # save the winner
         tournament_indices_winner = tournament_indices[tournament_index_of_max_reward]
@@ -143,7 +148,7 @@ def main():
             # no need to create a new pickle each time, replace old with updated new
             pickle_path = config['output_fname'] + "/tournament_winners.pickle"
             with open(pickle_path, 'wb') as handle:
-                pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
             # Load data (deserialize)
             # with open('filename.pickle', 'rb') as handle:
@@ -152,8 +157,7 @@ def main():
 
     # save any last our results
     if len(our_rewards) > 0:
-            csv_path = config['output_fname'] + "/tournament_number_" +
-            str(tournament_number) + '_results.csv'
+            csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
 
             pd.DataFrame(
                 {
@@ -169,7 +173,7 @@ def main():
     # no need to create a new pickle each time, replace old with updated new
     pickle_path = config['output_fname'] + "/tournament_winners.pickle"
     with open(pickle_path, 'wb') as handle:
-        pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     print("Time: " + str(round(elapsed)))
 
