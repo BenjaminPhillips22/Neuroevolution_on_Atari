@@ -72,6 +72,7 @@ def main():
         tournament_time = []
         tournament_frames = []
         tournament_ids = []
+        tournament_winning_seed_dicts = {}
 
         # select individuals for tournament
         random.seed(next(config['seed']))
@@ -98,61 +99,78 @@ def main():
                   ", id: " + str(population[i].id),
                   ", percent: " + str(round(total_frames*100/config["max_frames"], 2)), flush=True)
 
-        # who won the tournament?
+        # Who won the tournament?
         tournament_index_of_max_reward = np.argmax(tournament_rewards)
         print("TOURNAMENT WINNER id: " +
               str(tournament_ids[tournament_index_of_max_reward]) +
               " reward: " + tournament_rewards[tournament_index_of_max_reward])
 
-        # the not-winners take the dna of the winner
-
-        our_time.append(elapsed)
-        our_seeds.append(s)
-        our_rewards.append(reward)
-        our_frames.append(frames)
-        our_ids.append(i)
-        total_frames += frames
-
-        print("Time: " + str(round(elapsed)) +
-              ", Frames: " + str(total_frames) +
-              ", id: " + str(i),
-              ", seed: " + str(s) + 
-              ", percent: " + str(round(total_frames*100/config["max_frames"], 2)), flush=True)
-
-        if i % 10 == 0:
-            max_r_index = np.argmax(our_rewards)
-            print('max reward: ', str(our_rewards[max_r_index]), ' seed: ', str(our_seeds[max_r_index]))
+        # save the winner
+        tournament_indices_winner = tournament_indices[tournament_index_of_max_reward]
+        tournament_winning_seed_dicts[population[tournament_indices_winner].id] = population[tournament_indices_winner].seed_dict
         
-        if i % 10 == 0:
-            csv_path = config['output_fname'] + "/id_" + str(i) + '_results.csv'
+        # the not-winners take the dna of the winner
+        for i in tournament_indices:
+            if i == tournament_indices_winner:
+                pass
+            else:
+                population[i].take_dna(population[tournament_indices_winner])
+
+        # update our lists
+        our_time += tournament_time
+        our_rewards += tournament_rewards
+        our_frames += tournament_frames
+        our_ids += tournament_ids
+
+        if tournament_number % 10 == 0:
+
+            csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
+
             pd.DataFrame(
-                {                
+                {
                     'id': our_ids,
-                    'seed': our_seeds,
                     'reward': our_rewards,
                     'time': our_time,
                     'frames': our_frames
                 }
                 ).to_csv(csv_path, index=False)
-            our_seeds = []
             our_rewards = []
             our_time = []
             our_frames = []
             our_ids = []
 
+            # save best compressed_model seed_dicts
+            # no need to create a new pickle each time, replace old with updated new
+            pickle_path = config['output_fname'] + "/tournament_winners.pickle"
+            with open(pickle_path, 'wb') as handle:
+                pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+            # Load data (deserialize)
+            # with open('filename.pickle', 'rb') as handle:
+            #     unserialized_data = pickle.load(handle)
+
+
     # save any last our results
-    if len(our_seeds) > 0:
-        csv_path = config['output_fname'] + "/id_" + str(i) + '_results.csv'
-        pd.DataFrame(
-            {
-                'id': our_ids,
-                'seed': our_seeds,
-                'reward': our_rewards,
-                'time': our_time,
-                'frames': our_frames
-            }
-            ).to_csv(csv_path, index=False)
+    if len(our_rewards) > 0:
+            csv_path = config['output_fname'] + "/tournament_number_" +
+            str(tournament_number) + '_results.csv'
+
+            pd.DataFrame(
+                {
+                    'id': our_ids,
+                    'reward': our_rewards,
+                    'time': our_time,
+                    'frames': our_frames
+                }
+                ).to_csv(csv_path, index=False)
     elapsed = (time.time() - start)
+
+    # save best compressed_model seed_dicts
+    # no need to create a new pickle each time, replace old with updated new
+    pickle_path = config['output_fname'] + "/tournament_winners.pickle"
+    with open(pickle_path, 'wb') as handle:
+        pickle.dump(a, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     print("Time: " + str(round(elapsed)))
 
     print('all finished :D')
