@@ -34,6 +34,7 @@ def main():
     our_time = []
     our_frames = []
     our_ids = []
+    our_tournament_number = []
     total_frames = 0
     tournament_number = 0
 
@@ -77,6 +78,7 @@ def main():
         tournament_time = []
         tournament_frames = []
         tournament_ids = []
+        tournament_tournament_number = []
         
         # select individuals for tournament
         random.seed(next(config['get_seed']))
@@ -93,6 +95,7 @@ def main():
             total_frames += frames
 
             tournament_ids.append(population[i].id)
+            tournament_tournament_number.append(tournament_number)
             
             # record time
             elapsed = (time.time() - start)
@@ -126,6 +129,7 @@ def main():
         our_rewards += tournament_rewards
         our_frames += tournament_frames
         our_ids += tournament_ids
+        our_tournament_number += tournament_tournament_number
 
         if tournament_number % 10 == 0:
 
@@ -134,6 +138,7 @@ def main():
             pd.DataFrame(
                 {
                     'id': our_ids,
+                    'tournament_number': our_tournament_number,
                     'reward': our_rewards,
                     'time': our_time,
                     'frames': our_frames
@@ -143,6 +148,7 @@ def main():
             our_time = []
             our_frames = []
             our_ids = []
+            our_tournament_number = []
 
             # save best compressed_model seed_dicts
             # no need to create a new pickle each time, replace old with updated new
@@ -162,6 +168,7 @@ def main():
             pd.DataFrame(
                 {
                     'id': our_ids,
+                    'tournament_number': our_tournament_number,
                     'reward': our_rewards,
                     'time': our_time,
                     'frames': our_frames
