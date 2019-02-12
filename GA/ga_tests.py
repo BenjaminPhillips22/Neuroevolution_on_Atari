@@ -81,10 +81,14 @@ class GATests(unittest.TestCase):
         with open(f_name) as f:
             config = json.load(f)
 
-        generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
+        # generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
+        # set run seed and add generators to config
+        config['get_id'] = id_generator()
+        config['get_seed'] = random_seed_generator(config['run_seed'])
 
-        m1 = compressed_model.CompressedModel(generator_dict, config)
-        m2 = compressed_model.CompressedModel(generator_dict, config)
+
+        m1 = compressed_model.CompressedModel(config)
+        m2 = compressed_model.CompressedModel(config)
         
         m1_initial_seed_dict = copy.deepcopy(m1.seed_dict)
         m2_initial_seed_dict = copy.deepcopy(m2.seed_dict)
@@ -117,11 +121,17 @@ class GATests(unittest.TestCase):
 
             config['mutation_rate'] = 0.999
 
-            generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
-            m1 = compressed_model.CompressedModel(generator_dict, config)
+            # generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
+            # set run seed and add generators to config
+            config['get_id'] = id_generator()
+            config['get_seed'] = random_seed_generator(config['run_seed'])
+            m1 = compressed_model.CompressedModel(config)
 
-            generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
-            m2 = compressed_model.CompressedModel(generator_dict, config)
+            # generator_dict = {'id': id_generator(), 'seed': random_seed_generator()}
+            # set run seed and add generators to config
+            config['get_id'] = id_generator()
+            config['get_seed'] = random_seed_generator(config['run_seed'])
+            m2 = compressed_model.CompressedModel(config)
             
             self.assertEqual(m1.seed_dict, m2.seed_dict)
 
