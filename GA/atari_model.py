@@ -34,7 +34,7 @@ class AtariModel():
     def reset(self, env):
         return self.convert_state(env.reset())
 
-    def evaluate_model(self, monitor=False, max_noop=30):
+    def evaluate_model(self, monitor=False, max_noop=30, set_noop=-1):
         """
         outputs reward and frames. Can create an mp3 with monitor=True
         """
@@ -53,7 +53,11 @@ class AtariModel():
 
         # implement random no-operations
         random.seed(next(self.get_seed))
-        noops = random.randint(0, max_noop)
+        if set_noop > 0:
+            noops = set_noop
+        else:
+            noops = random.randint(0, max_noop)
+
         for _ in range(noops):
             observation, reward, done, _ = env.step(0)
             total_reward += reward
