@@ -41,12 +41,12 @@ class AtariModel():
         want to set (eg set_env_seed=101) if you do want to set the env_seed
         """
         env = gym.make(self.env_name)
-        
-        if set_env_seed:
+
+        if not set_env_seed:
             env_seed = next(self.get_seed)
         else:
             env_seed = set_env_seed
-        
+
         env.seed(env_seed)
 
         cur_states = [self.reset(env)] * 4

@@ -5,6 +5,7 @@ import random
 import json
 
 import base_model
+import atari_model
 import compressed_model
 
 
@@ -150,6 +151,34 @@ class GATests(unittest.TestCase):
 
             self.assertEqual(m1.id, 2)
 
+    def test_set_env_seed(self):
+        """
+        
+        """
+        f_name = 'ga_frostbite.json'
+        with open(f_name) as f:
+            config = json.load(f)
+
+        # set run seed and add generators to config
+        config['get_id'] = id_generator()
+        config['get_seed'] = random_seed_generator(config['run_seed'])
+
+        a_seed_dict = {'conv1.weight': [248528185],
+                       'conv2.weight': [1877002014],
+                       'conv3.weight': [1679996776],
+                       'dense.weight': [919992575],
+                       'out.weight': [1904593925]}
+
+        m1 = atari_model.AtariModel(a_seed_dict, config)
+        m2 = atari_model.AtariModel(a_seed_dict, config)
+
+        reward_1, frames_1, env_seed_1 = m1.evaluate_model(set_env_seed=101)
+        reward_2, frames_2, env_seed_2 = m2.evaluate_model(set_env_seed=101)
+
+        self.assertEqual(reward_1, reward_2)
+        self.assertEqual(frames_1, frames_2)
+        self.assertEqual(env_seed_1, env_seed_2)
+        
 
 if __name__ == '__main__':
     unittest.main()
