@@ -29,7 +29,7 @@ def id_generator(start=0):
 
 def main():
 
-    # our_seeds = []
+    our_env_seeds = []
     our_rewards = []
     our_time = []
     our_frames = []
@@ -74,6 +74,7 @@ def main():
 
         # tournament lists
         tournament_number += 1
+        tournament_env_seed = []
         tournament_rewards = []
         tournament_time = []
         tournament_frames = []
@@ -87,16 +88,17 @@ def main():
         # get rewards
         for i in tournament_indices:
 
-            reward, frames = population[i].evaluate_compressed_model()
+            reward, frames, env_seed = population[i].evaluate_compressed_model()
             tournament_rewards.append(reward)
             tournament_frames.append(frames)
+            tournament_env_seed.append(env_seed)
 
             # update total_frames
             total_frames += frames
 
             tournament_ids.append(population[i].id)
             tournament_tournament_number.append(tournament_number)
-            
+
             # record time
             elapsed = (time.time() - start)
             tournament_time.append(elapsed)
@@ -126,6 +128,7 @@ def main():
 
         # update our lists
         our_time += tournament_time
+        our_env_seeds += tournament_env_seed
         our_rewards += tournament_rewards
         our_frames += tournament_frames
         our_ids += tournament_ids
@@ -138,12 +141,14 @@ def main():
             pd.DataFrame(
                 {
                     'id': our_ids,
+                    'tournament_env_seed': our_env_seeds,
                     'tournament_number': our_tournament_number,
                     'reward': our_rewards,
                     'time': our_time,
                     'frames': our_frames
                 }
                 ).to_csv(csv_path, index=False)
+            our_env_seeds = []
             our_rewards = []
             our_time = []
             our_frames = []
@@ -160,7 +165,6 @@ def main():
             # with open('filename.pickle', 'rb') as handle:
             #     unserialized_data = pickle.load(handle)
 
-
     # save any last our results
     if len(our_rewards) > 0:
             csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
@@ -168,6 +172,7 @@ def main():
             pd.DataFrame(
                 {
                     'id': our_ids,
+                    'tournament_env_seed': our_env_seeds,
                     'tournament_number': our_tournament_number,
                     'reward': our_rewards,
                     'time': our_time,

@@ -34,12 +34,20 @@ class AtariModel():
     def reset(self, env):
         return self.convert_state(env.reset())
 
-    def evaluate_model(self, monitor=False, max_noop=30, set_noop=-1):
+    def evaluate_model(self, monitor=False, max_noop=30, set_env_seed=False):
         """
-        outputs reward and frames. Can create an mp3 with monitor=True
+        outputs reward, frames and env_seed. Can create an mp3 with monitor=True.
+        set_env_seed is False if not setting a seed, or the number of the seed you
+        want to set (eg set_env_seed=101) if you do want to set the env_seed
         """
         env = gym.make(self.env_name)
-        env.seed(0)
+        
+        if set_env_seed:
+            env_seed = next(self.get_seed)
+        else:
+            env_seed = set_env_seed
+        
+        env.seed(env_seed)
 
         cur_states = [self.reset(env)] * 4
         total_reward = 0
@@ -52,11 +60,8 @@ class AtariModel():
         env.reset()
 
         # implement random no-operations
-        random.seed(next(self.get_seed))
-        if set_noop > 0:
-            noops = set_noop
-        else:
-            noops = random.randint(0, max_noop)
+        random.seed(env_seed)
+        noops = random.randint(0, max_noop)
 
         for _ in range(noops):
             observation, reward, done, _ = env.step(0)
@@ -102,4 +107,4 @@ class AtariModel():
             cur_states.append(new_frame)
 
         env.env.close()
-        return total_reward, total_frames
+        return total_reward, total_frames, env_seed

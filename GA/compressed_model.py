@@ -54,5 +54,5 @@ class CompressedModel():
         make AtariModel, get reward and frames from it.
         """
         model = atari_model.AtariModel(self.seed_dict, self.config)
-        reward, frames = model.evaluate_model()
+        reward, frames, env_seed = model.evaluate_model()
         return reward, frames
