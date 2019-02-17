@@ -1,12 +1,12 @@
 {
     "name": "Ben's Cool GA JSON",
     "env": "Frostbite-v4",
-    "max_frames": 1e8,
+    "max_frames": 1e5,
     "max_frames_per_episode": 20000,
     "output_fname": "v/frostbite-experiment-",
     "run_seed": 321123,
     "mutation_rate": 0.05,
     "sigma": 0.005,
-    "population_size": 500,
-    "tournament_size": 50
+    "population_size": 12,
+    "tournament_size": 4
 }

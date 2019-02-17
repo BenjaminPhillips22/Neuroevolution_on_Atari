@@ -66,7 +66,7 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=3, monitor=True):
     ax = sns.swarmplot(data=our_rewards, color=".1")
     title = 'seed_' + str(config['run_seed'])
     ax.set_title(title)
-    figure = ax.get_figure()    
+    figure = ax.get_figure()
     plot_path = new_folder + '/' + title + '.png'
     figure.savefig(plot_path)
 

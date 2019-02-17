@@ -1,5 +1,5 @@
 """
-Run the genetic algorithm
+Re-Run the genetic algorithm
 """
 
 import os
@@ -29,6 +29,9 @@ def id_generator(start=0):
 
 def main():
 
+    # folder where we want to continue from
+    FOLDER_NAME = 'v/frostbite-experiment-1550192228.0179362'
+
     our_env_seeds = []
     our_rewards = []
     our_time = []
@@ -36,7 +39,6 @@ def main():
     our_ids = []
     our_tournament_number = []
     total_frames = 0
-    tournament_number = 0
 
     # open json
     f_name = 'ga_frostbite.json'
@@ -47,24 +49,32 @@ def main():
     assert config['tournament_size'] <= config['population_size']
 
     # add time stamp to output_fname
-    config['output_fname'] = config['output_fname'] + str(time.time())
+    config['output_fname'] = FOLDER_NAME
 
     # creating a new folder
-    os.makedirs(config['output_fname'])
+    # os.makedirs(config['output_fname'])
 
     # save config
-    csv_path = config['output_fname'] + '/config.csv'
-    pd.DataFrame.from_dict(config, orient='index').to_csv(csv_path)
+    # csv_path = config['output_fname'] + '/config.csv'
+    # pd.DataFrame.from_dict(config, orient='index').to_csv(csv_path)
 
     # start timing
     start = time.time()
 
-    # set run seed and add generators to config
-    config['get_id'] = id_generator()
-    config['get_seed'] = random_seed_generator(config['run_seed'])
+    # get saved population and seed
+    # Load data (deserialize)
+    with open('pop_and_seed.pickle', 'rb') as handle:
+        pop_and_seed = pickle.load(handle)
 
     # create the population
-    population = [compressed_model.CompressedModel(config) for _ in range(config["population_size"])]
+    population = pop_and_seed['population']
+
+    # get tournament number
+    tournament_number = pop_and_seed['tournament']
+
+    # set run seed and add generators to config
+    config['get_id'] = id_generator()
+    config['get_seed'] = random_seed_generator(pop_and_seed['seed'])
 
     # dict to store tournament winners
     tournament_winning_seed_dicts = {}
@@ -167,15 +177,15 @@ def main():
 
             # save the latest generation in case I want to re-run from there.
             # again, replace previous with update.
-            pickle_path = config['output_fname'] + "/pop_and_seed.pickle"
+            pickle_path = config['output_fname'] + "/generation.pickle"
             with open(pickle_path, 'wb') as handle:
                 pickle.dump(
                     {
                         'population': population,
-                        'seed': next(config['get_seed']),
-                        'tournament': tournament_number
+                        'seed': next(config['get_seed'])
                     },
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 
     # save any last our results
     if len(our_rewards) > 0:
@@ -198,16 +208,6 @@ def main():
     pickle_path = config['output_fname'] + "/tournament_winners.pickle"
     with open(pickle_path, 'wb') as handle:
         pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    pickle_path = config['output_fname'] + "/pop_and_seed.pickle"
-    with open(pickle_path, 'wb') as handle:
-        pickle.dump(
-            {
-                'population': population,
-                'seed': next(config['get_seed']),
-                'tournament': tournament_number
-            },
-            handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     print("Time: " + str(round(elapsed)))
 
