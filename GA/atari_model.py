@@ -38,7 +38,9 @@ class AtariModel():
         """
         outputs reward, frames and env_seed. Can create an mp3 with monitor=True.
         set_env_seed is False if not setting a seed, or the number of the seed you
-        want to set (eg set_env_seed=101) if you do want to set the env_seed
+        want to set (eg set_env_seed=101) if you do want to set the env_seed.
+        output_fn allows user to select output folder for mp4 otherwise the folder set
+        in the config is used.
         """
         env = gym.make(self.env_name)
 
