@@ -34,7 +34,7 @@ class AtariModel():
     def reset(self, env):
         return self.convert_state(env.reset())
 
-    def evaluate_model(self, monitor=False, max_noop=30, set_env_seed=False):
+    def evaluate_model(self, monitor=False, max_noop=30, set_env_seed=False, output_fn='AUTO'):
         """
         outputs reward, frames and env_seed. Can create an mp3 with monitor=True.
         set_env_seed is False if not setting a seed, or the number of the seed you
@@ -55,7 +55,11 @@ class AtariModel():
         old_lives = env.env.ale.lives()
 
         if monitor:
-            env = wrappers.Monitor(env, self.output_fname)
+            if output_fn == 'AUTO':
+                output_fn = self.output_fname
+            else:
+                pass
+            env = wrappers.Monitor(env, output_fn)
 
         env.reset()
 

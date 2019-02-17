@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import seaborn as sns
 import numpy as np
 import pandas as pd
 import random
@@ -24,7 +25,7 @@ def id_generator(start=0):
         yield start
 
 
-def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
+def test_seed(seed_dict, config, m_id, env_seed, num_trails=3, monitor=True):
     """
     test if the model generalised or is only good on the specific
     env it stumbled upon. Creates a csv for each seed_dict and
@@ -40,7 +41,7 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
     model = atari_model.AtariModel(seed_dict, config)
 
     for n in range(num_trails):
-        reward, frames, env_seed = model.evaluate_model(monitor=monitor,
+        reward, frames, env_seed = model.evaluate_model(monitor=False,
                                                         set_env_seed=seed)
         seed = next(rsg)
         our_rewards.append(reward)
@@ -48,8 +49,10 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
         our_env_seeds.append(env_seed)
         print('ID: ' + str(m_id) + ' run: ' + str(n), flush=True)
 
-    csv_path = config['output_fname'] + "/test_seed_" + str(m_id) + '.csv'
+    new_folder = str(m_id)
+    os.makedirs(new_folder)
 
+    csv_path = new_folder + '/test_seed_' + str(m_id) + '.csv'
     pd.DataFrame(
         {
             'tournament_env_seed': our_env_seeds,
@@ -57,6 +60,22 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
             'frames': our_frames
         }
         ).to_csv(csv_path, index=False)
+    
+    # save boxplot of results
+    ax = sns.boxplot(data=our_rewards, color="lightblue")
+    ax = sns.swarmplot(data=our_rewards, color=".1")
+    title = 'seed_' + str(config['run_seed'])
+    ax.set_title(title)
+    figure = ax.get_figure()    
+    plot_path = new_folder + '/' + title + '.png'
+    figure.savefig(plot_path)
+
+    # monitor best run
+    if monitor:
+        best_seed = our_env_seeds[np.argmax(our_rewards)]
+        reward, frames, env_seed = model.evaluate_model(monitor=True,
+                                                        set_env_seed=best_seed,
+                                                        output_fn=new_folder)
 
 
 def main():
@@ -69,7 +88,7 @@ def main():
         config = json.load(f)
 
     # add time stamp to output_fname
-    config['output_fname'] = FOLDER_NAME
+    config['output_fname'] = '.'
 
     # start timing
     # start = time.time()
@@ -94,7 +113,7 @@ def main():
 
     # check generalisability for top __
     checked_ids = []
-    for i in range(5):
+    for i in range(1):
         m_id = df.iloc[i]['id']
         if m_id in checked_ids:
             pass
@@ -103,7 +122,7 @@ def main():
             test_seed(seed_dict=tournament_winning_seed_dicts[m_id],
                       config=config,
                       m_id=m_id,
-                      env_seed=df.iloc[i]['tournament_env_seed'])
+                      env_seed=np.int(df.iloc[i]['tournament_env_seed']))
 
 
 if __name__ == "__main__":
