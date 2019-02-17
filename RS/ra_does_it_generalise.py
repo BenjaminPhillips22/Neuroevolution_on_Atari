@@ -162,7 +162,7 @@ def main():
     ax = sns.swarmplot(data=our_rewards, color=".1")
     title = 'seed_' + str(config['run_seed'])
     ax.set_title(title)
-    figure = ax.get_figure()    
+    figure = ax.get_figure()
     plot_path = config['output_fname'] + '/' + title + '.png'
     figure.savefig(plot_path)
 
