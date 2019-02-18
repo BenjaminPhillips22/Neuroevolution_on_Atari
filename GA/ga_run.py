@@ -88,7 +88,7 @@ def main():
         # get rewards
         for i in tournament_indices:
 
-            reward, frames, env_seed = population[i].evaluate_compressed_model()
+            reward, frames, env_seed = population[i].evaluate_compressed_model(config)
             tournament_rewards.append(reward)
             tournament_frames.append(frames)
             tournament_env_seed.append(env_seed)
@@ -124,7 +124,7 @@ def main():
             if i == tournament_indices_winner:
                 pass
             else:
-                population[i].take_dna(population[tournament_indices_winner])
+                population[i].take_dna(population[tournament_indices_winner], config)
 
         # update our lists
         our_time += tournament_time

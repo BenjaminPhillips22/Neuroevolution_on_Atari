@@ -32,7 +32,7 @@ class CompressedModel():
         for name, _ in self.seed_dict.items():
             random.seed(next(config['get_seed']))
             if random.random() < self.mutation_rate:
-                self.seed_dict[name].append(next(self.get_seed))
+                self.seed_dict[name].append(next(config['get_seed']))
 
     def take_dna(self, OtherCompressedModel, config, mutate=True):
         """
@@ -48,7 +48,7 @@ class CompressedModel():
             self.mutate(config)
 
         # update id
-        self.id = next(self.gen_id)
+        self.id = next(config['get_id'])
 
     def evaluate_compressed_model(self, config):
         """
