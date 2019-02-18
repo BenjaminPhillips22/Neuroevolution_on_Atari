@@ -1,3 +1,8 @@
+"""
+Run the seeds through their paces.
+Will have to update code if using winners from ga_rerun.py
+"""
+
 import os
 import json
 import time
@@ -25,7 +30,7 @@ def id_generator(start=0):
         yield start
 
 
-def test_seed(seed_dict, config, m_id, env_seed, num_trails=3, monitor=True):
+def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
     """
     test if the model generalised or is only good on the specific
     env it stumbled upon. Creates a csv for each seed_dict and
@@ -80,7 +85,7 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=3, monitor=True):
 
 def main():
 
-    FOLDER_NAME = 'v/frostbite-experiment-1550192228.0179362'
+    FOLDER_NAME = 'v/frostbite-experiment-1550464143.200036'
 
     # open json
     f_name = 'ga_frostbite.json'
@@ -113,7 +118,7 @@ def main():
 
     # check generalisability for top __
     checked_ids = []
-    for i in range(1):
+    for i in range(2):
         m_id = df.iloc[i]['id']
         if m_id in checked_ids:
             pass

@@ -173,42 +173,44 @@ def main():
                     {
                         'population': population,
                         'seed': next(config['get_seed']),
-                        'tournament': tournament_number
+                        'tournament': tournament_number,
+                        'id': next(config['get_id'])
                     },
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # save any last our results
     if len(our_rewards) > 0:
-            csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
+        csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
 
-            pd.DataFrame(
-                {
-                    'id': our_ids,
-                    'tournament_env_seed': our_env_seeds,
-                    'tournament_number': our_tournament_number,
-                    'reward': our_rewards,
-                    'time': our_time,
-                    'frames': our_frames
-                }
-                ).to_csv(csv_path, index=False)
-    elapsed = (time.time() - start)
-
-    # save best compressed_model seed_dicts
-    # no need to create a new pickle each time, replace old with updated new
-    pickle_path = config['output_fname'] + "/tournament_winners.pickle"
-    with open(pickle_path, 'wb') as handle:
-        pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    pickle_path = config['output_fname'] + "/pop_and_seed.pickle"
-    with open(pickle_path, 'wb') as handle:
-        pickle.dump(
+        pd.DataFrame(
             {
-                'population': population,
-                'seed': next(config['get_seed']),
-                'tournament': tournament_number
-            },
-            handle, protocol=pickle.HIGHEST_PROTOCOL)
+                'id': our_ids,
+                'tournament_env_seed': our_env_seeds,
+                'tournament_number': our_tournament_number,
+                'reward': our_rewards,
+                'time': our_time,
+                'frames': our_frames
+            }
+            ).to_csv(csv_path, index=False)
 
+        # save best compressed_model seed_dicts
+        # no need to create a new pickle each time, replace old with updated new
+        pickle_path = config['output_fname'] + "/tournament_winners.pickle"
+        with open(pickle_path, 'wb') as handle:
+            pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        pickle_path = config['output_fname'] + "/pop_and_seed.pickle"
+        with open(pickle_path, 'wb') as handle:
+            pickle.dump(
+                {
+                    'population': population,
+                    'seed': next(config['get_seed']),
+                    'tournament': tournament_number,
+                    'id': next(config['get_id'])
+                },
+                handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    elapsed = (time.time() - start)
     print("Time: " + str(round(elapsed)))
 
     print('all finished :D')

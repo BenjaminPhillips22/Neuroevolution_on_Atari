@@ -1,6 +1,8 @@
 """
-continue the genetic algorithm from where it left off
+Continue the genetic algorithm from where it left off.
+Will have to update if dealing with new tournament_winners pickle....
 """
+
 
 import os
 import json
@@ -30,7 +32,7 @@ def id_generator(start=0):
 def main():
 
     # folder where we want to continue from
-    FOLDER_NAME = 'v/frostbite-experiment-1550192228.0179362'
+    FOLDER_NAME = 'v/frostbite-experiment-1550467378.821758'
 
     our_env_seeds = []
     our_rewards = []
@@ -63,7 +65,9 @@ def main():
 
     # get saved population and seed
     # Load data (deserialize)
-    with open('pop_and_seed.pickle', 'rb') as handle:
+    print("Loading Pickled Generation")
+    path = FOLDER_NAME + "/pop_and_seed.pickle"
+    with open(path, 'rb') as handle:
         pop_and_seed = pickle.load(handle)
 
     # create the population
@@ -73,7 +77,7 @@ def main():
     tournament_number = pop_and_seed['tournament']
 
     # set run seed and add generators to config
-    config['get_id'] = id_generator()
+    config['get_id'] = id_generator(pop_and_seed['id'])
     config['get_seed'] = random_seed_generator(pop_and_seed['seed'])
 
     # dict to store tournament winners
@@ -90,7 +94,7 @@ def main():
         tournament_frames = []
         tournament_ids = []
         tournament_tournament_number = []
-        
+
         # select individuals for tournament
         random.seed(next(config['get_seed']))
         tournament_indices = random.sample(population=range(config['population_size']), k=config['tournament_size'])
@@ -128,7 +132,7 @@ def main():
         # save the winner
         tournament_indices_winner = tournament_indices[tournament_index_of_max_reward]
         tournament_winning_seed_dicts[population[tournament_indices_winner].id] = population[tournament_indices_winner].seed_dict
-        
+
         # the not-winners take the dna of the winner
         for i in tournament_indices:
             if i == tournament_indices_winner:
@@ -171,10 +175,6 @@ def main():
             with open(pickle_path, 'wb') as handle:
                 pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-            # Load data (deserialize)
-            # with open('filename.pickle', 'rb') as handle:
-            #     unserialized_data = pickle.load(handle)
-
             # save the latest generation in case I want to re-run from there.
             # again, replace previous with update.
             pickle_path = config['output_fname'] + "/pop_and_seed_" + str(pop_and_seed['tournament']) + "_.pickle"
@@ -183,25 +183,25 @@ def main():
                     {
                         'population': population,
                         'seed': next(config['get_seed']),
-                        'tournament': tournament_number
+                        'tournament': tournament_number,
+                        'id': next(config['get_id'])
                     },
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-
     # save any last our results
     if len(our_rewards) > 0:
-            csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
+        csv_path = config['output_fname'] + "/tournament_number_" + str(tournament_number) + '_results.csv'
 
-            pd.DataFrame(
-                {
-                    'id': our_ids,
-                    'tournament_env_seed': our_env_seeds,
-                    'tournament_number': our_tournament_number,
-                    'reward': our_rewards,
-                    'time': our_time,
-                    'frames': our_frames
-                }
-                ).to_csv(csv_path, index=False)
+        pd.DataFrame(
+            {
+                'id': our_ids,
+                'tournament_env_seed': our_env_seeds,
+                'tournament_number': our_tournament_number,
+                'reward': our_rewards,
+                'time': our_time,
+                'frames': our_frames
+            }
+            ).to_csv(csv_path, index=False)
 
         # save best compressed_model seed_dicts
         # no need to create a new pickle each time, replace old with updated new
@@ -217,7 +217,8 @@ def main():
                 {
                     'population': population,
                     'seed': next(config['get_seed']),
-                    'tournament': tournament_number
+                    'tournament': tournament_number,
+                    'id': next(config['get_id'])
                 },
                 handle, protocol=pickle.HIGHEST_PROTOCOL)
 
