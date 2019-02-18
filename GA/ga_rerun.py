@@ -1,5 +1,5 @@
 """
-Re-Run the genetic algorithm
+continue the genetic algorithm from where it left off
 """
 
 import os
@@ -98,7 +98,7 @@ def main():
         # get rewards
         for i in tournament_indices:
 
-            reward, frames, env_seed = population[i].evaluate_compressed_model()
+            reward, frames, env_seed = population[i].evaluate_compressed_model(config)
             tournament_rewards.append(reward)
             tournament_frames.append(frames)
             tournament_env_seed.append(env_seed)
@@ -134,7 +134,7 @@ def main():
             if i == tournament_indices_winner:
                 pass
             else:
-                population[i].take_dna(population[tournament_indices_winner])
+                population[i].take_dna(population[tournament_indices_winner], config)
 
         # update our lists
         our_time += tournament_time
@@ -167,7 +167,7 @@ def main():
 
             # save best compressed_model seed_dicts
             # no need to create a new pickle each time, replace old with updated new
-            pickle_path = config['output_fname'] + "/tournament_winners.pickle"
+            pickle_path = config['output_fname'] + "/tournament_winners_" + str(pop_and_seed['tournament']) + "_.pickle"
             with open(pickle_path, 'wb') as handle:
                 pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -177,12 +177,13 @@ def main():
 
             # save the latest generation in case I want to re-run from there.
             # again, replace previous with update.
-            pickle_path = config['output_fname'] + "/generation.pickle"
+            pickle_path = config['output_fname'] + "/pop_and_seed_" + str(pop_and_seed['tournament']) + "_.pickle"
             with open(pickle_path, 'wb') as handle:
                 pickle.dump(
                     {
                         'population': population,
-                        'seed': next(config['get_seed'])
+                        'seed': next(config['get_seed']),
+                        'tournament': tournament_number
                     },
                     handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -201,14 +202,26 @@ def main():
                     'frames': our_frames
                 }
                 ).to_csv(csv_path, index=False)
+
+        # save best compressed_model seed_dicts
+        # no need to create a new pickle each time, replace old with updated new
+        pickle_path = config['output_fname'] + "/tournament_winners_" + str(pop_and_seed['tournament']) + "_.pickle"
+        with open(pickle_path, 'wb') as handle:
+            pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # save the latest generation in case I want to re-run from there.
+        # again, replace previous with update.
+        pickle_path = config['output_fname'] + "/pop_and_seed_" + str(pop_and_seed['tournament']) + "_.pickle"
+        with open(pickle_path, 'wb') as handle:
+            pickle.dump(
+                {
+                    'population': population,
+                    'seed': next(config['get_seed']),
+                    'tournament': tournament_number
+                },
+                handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     elapsed = (time.time() - start)
-
-    # save best compressed_model seed_dicts
-    # no need to create a new pickle each time, replace old with updated new
-    pickle_path = config['output_fname'] + "/tournament_winners.pickle"
-    with open(pickle_path, 'wb') as handle:
-        pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
     print("Time: " + str(round(elapsed)))
 
     print('all finished :D')
