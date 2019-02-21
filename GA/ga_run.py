@@ -43,31 +43,73 @@ def main():
     with open(f_name) as f:
         config = json.load(f)
 
-    # check tournament size isn't bigger than population
-    assert config['tournament_size'] <= config['population_size']
+    # is this the first run?
+    # If yes, create to population and get rolling
+    # if no, then pick up where it left off
+    if config['run_number'] == 0:
 
-    # add time stamp to output_fname
-    config['output_fname'] = config['output_fname'] + str(time.time())
+        print('Getting things started.', flush=True)
 
-    # creating a new folder
-    os.makedirs(config['output_fname'])
+        # check tournament size isn't bigger than population
+        assert config['tournament_size'] <= config['population_size']
 
-    # save config
-    csv_path = config['output_fname'] + '/config.csv'
-    pd.DataFrame.from_dict(config, orient='index').to_csv(csv_path)
+        # update run_number
+        config['run_number'] += 1
 
-    # start timing
-    start = time.time()
+        # add time stamp to output_fname
+        config['output_fname'] = config['output_fname'] + str(time.time())
 
-    # set run seed and add generators to config
-    config['get_id'] = id_generator()
-    config['get_seed'] = random_seed_generator(config['run_seed'])
+        # save updated config
+        with open(f_name, 'w') as outfile:
+            json.dump(config, outfile)
 
-    # create the population
-    population = [compressed_model.CompressedModel(config) for _ in range(config["population_size"])]
+        # creating a new folder
+        os.makedirs(config['output_fname'])
+
+        # save config
+        csv_path = config['output_fname'] + '/config.csv'
+        pd.DataFrame.from_dict(config, orient='index').to_csv(csv_path)
+
+        # set run seed and add generators to config
+        config['get_id'] = id_generator()
+        config['get_seed'] = random_seed_generator(config['run_seed'])
+
+        # create the population
+        population = [compressed_model.CompressedModel(config) for _ in range(config["population_size"])]
+
+    else:
+
+        print('Pciking up where we left off.', flush=True)
+
+        # check tournament size isn't bigger than population
+        assert config['tournament_size'] <= config['population_size']
+
+        # update run_number
+        config['run_number'] += 1
+
+        # save updated config
+        with open(f_name, 'w') as outfile:
+            json.dump(config, outfile)
+
+        path = config['output_fname'] + "/generation_" + str(config['run_number']-1) + "_.pickle"
+        with open(path, 'rb') as handle:
+            generation = pickle.load(handle)
+
+        # create the population
+        population = generation['population']
+
+        # get tournament number
+        tournament_number = generation['tournament']
+
+        # set run seed and add generators to config
+        config['get_id'] = id_generator(generation['id'])
+        config['get_seed'] = random_seed_generator(generation['seed'])
 
     # dict to store tournament winners
     tournament_winning_seed_dicts = {}
+
+    # start timing
+    start = time.time()
 
     # start the 'GA' search!
     while total_frames < config['max_frames']:
@@ -157,7 +199,7 @@ def main():
 
             # save best compressed_model seed_dicts
             # no need to create a new pickle each time, replace old with updated new
-            pickle_path = config['output_fname'] + "/tournament_winners.pickle"
+            pickle_path = config['output_fname'] + "/tournament_winners_" + str(config['run_number']) + "_.pickle"
             with open(pickle_path, 'wb') as handle:
                 pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -167,7 +209,7 @@ def main():
 
             # save the latest generation in case I want to re-run from there.
             # again, replace previous with update.
-            pickle_path = config['output_fname'] + "/pop_and_seed.pickle"
+            pickle_path = config['output_fname'] + "/generation_" + str(config['run_number']) + "_.pickle"
             with open(pickle_path, 'wb') as handle:
                 pickle.dump(
                     {
@@ -195,11 +237,13 @@ def main():
 
         # save best compressed_model seed_dicts
         # no need to create a new pickle each time, replace old with updated new
-        pickle_path = config['output_fname'] + "/tournament_winners.pickle"
+        pickle_path = config['output_fname'] + "/tournament_winners_" + str(config['run_number']) + "_.pickle"
         with open(pickle_path, 'wb') as handle:
             pickle.dump(tournament_winning_seed_dicts, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        pickle_path = config['output_fname'] + "/pop_and_seed.pickle"
+        # save the latest generation in case I want to re-run from there.
+        # again, replace previous with update.
+        pickle_path = config['output_fname'] + "/generation_" + str(config['run_number']) + "_.pickle"
         with open(pickle_path, 'wb') as handle:
             pickle.dump(
                 {
