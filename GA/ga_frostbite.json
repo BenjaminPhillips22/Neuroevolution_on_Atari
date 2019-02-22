@@ -8,6 +8,6 @@
     "run_seed": 3001,
     "mutation_rate": 0.05,
     "sigma": 0.005,
-    "population_size": 12,
-    "tournament_size": 4
+    "population_size": 320,
+    "tournament_size": 16
 }
