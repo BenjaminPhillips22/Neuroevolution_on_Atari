@@ -79,7 +79,7 @@ def main():
 
     else:
 
-        print('Pciking up where we left off.', flush=True)
+        print('Picking up where we left off.', flush=True)
 
         # check tournament size isn't bigger than population
         assert config['tournament_size'] <= config['population_size']
