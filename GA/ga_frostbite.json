@@ -1,7 +1,7 @@
 {
     "name": "Ben's Cool GA JSON",
     "env": "Frostbite-v4",
-    "max_frames": 1e6,
+    "max_frames": 1e7,
     "max_frames_per_episode": 20000,
     "output_fname": "v/frostbite-experiment-",
     "run_number": 0,
