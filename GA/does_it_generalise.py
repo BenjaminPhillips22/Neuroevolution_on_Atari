@@ -16,6 +16,11 @@ import glob
 import atari_model
 
 
+# Global Variables
+NUM_SEEDS_TO_CHECK = 1
+NUM_SEED_TRAILS = 4
+
+
 def random_seed_generator(seed=2):
     while True:
         random.seed(seed)
@@ -30,12 +35,20 @@ def id_generator(start=0):
         yield start
 
 
-def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
+def test_seed(seed_dict, config, m_id, env_seed, num_trails=NUM_SEED_TRAILS, monitor=True):
     """
     test if the model generalised or is only good on the specific
     env it stumbled upon. Creates a csv for each seed_dict and
     can make an mp4 for the best when monitor=True
     """
+
+    new_folder = str(m_id)
+    if os.path.isdir(new_folder):
+        print('Folder already exists')
+        return None
+    else:
+        os.makedirs(new_folder)
+
     our_rewards = []
     our_frames = []
     our_env_seeds = []
@@ -54,8 +67,6 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
         our_env_seeds.append(env_seed)
         print('ID: ' + str(m_id) + ' run: ' + str(n), flush=True)
 
-    new_folder = str(m_id)
-    os.makedirs(new_folder)
 
     csv_path = new_folder + '/test_seed_' + str(m_id) + '.csv'
     pd.DataFrame(
@@ -85,7 +96,9 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=12, monitor=True):
 
 def main():
 
-    FOLDER_NAME = 'v/frostbite-experiment-1550464143.200036'
+    print("Does it generalise!?!?")
+
+    # FOLDER_NAME = 'v/frostbite-experiment-1550464143.200036'
 
     # open json
     f_name = 'ga_frostbite.json'
@@ -93,7 +106,7 @@ def main():
         config = json.load(f)
 
     # add time stamp to output_fname
-    config['output_fname'] = '.'
+    # config['output_fname'] = '.'
 
     # start timing
     # start = time.time()
@@ -103,11 +116,14 @@ def main():
     config['get_seed'] = random_seed_generator(config['run_seed'])
 
     # move into directory
-    os.chdir(FOLDER_NAME)
+    os.chdir(config['output_fname'])
 
     # Load data (deserialize)
-    with open('tournament_winners.pickle', 'rb') as handle:
-        tournament_winning_seed_dicts = pickle.load(handle)
+    files = glob.glob('tournament_winners*')
+    tournament_winning_seed_dicts = {}
+    for f in files:
+        with open(f, 'rb') as handle:
+            tournament_winning_seed_dicts.update(pickle.load(handle))
 
     # get results from run
     files = glob.glob('*results.csv')
@@ -118,7 +134,7 @@ def main():
 
     # check generalisability for top __
     checked_ids = []
-    for i in range(2):
+    for i in range(NUM_SEEDS_TO_CHECK+1):
         m_id = df.iloc[i]['id']
         if m_id in checked_ids:
             pass
