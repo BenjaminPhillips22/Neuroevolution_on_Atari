@@ -17,8 +17,8 @@ import atari_model
 
 
 # Global Variables
-NUM_SEEDS_TO_CHECK = 10
-NUM_SEED_TRAILS = 30
+NUM_SEEDS_TO_CHECK = 1
+NUM_SEED_TRAILS = 1
 
 
 def random_seed_generator(seed=2):
@@ -65,7 +65,7 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=NUM_SEED_TRAILS, mon
         our_rewards.append(reward)
         our_frames.append(frames)
         our_env_seeds.append(env_seed)
-        print('ID: ' + str(m_id) + ' run: ' + str(n), flush=True)
+        print('ID: ' + str(m_id) + ' run: ' + str(n) + ' reward: ' + str(reward), flush=True)
 
     csv_path = new_folder + '/test_seed_' + str(m_id) + '.csv'
     pd.DataFrame(
@@ -133,9 +133,10 @@ def main():
 
     # check generalisability for top __
     checked_ids = []
-    for i in range(NUM_SEEDS_TO_CHECK+1):
+    for i in range(NUM_SEEDS_TO_CHECK):
         m_id = df.iloc[i]['id']
         if m_id in checked_ids:
+            print("Already checked this ID")
             pass
         elif m_id in tournament_winning_seed_dicts.keys():
             checked_ids.append(m_id)
