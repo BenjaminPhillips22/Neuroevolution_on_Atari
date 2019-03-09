@@ -17,8 +17,8 @@ import atari_model
 
 
 # Global Variables
-NUM_SEEDS_TO_CHECK = 1
-NUM_SEED_TRAILS = 4
+NUM_SEEDS_TO_CHECK = 10
+NUM_SEED_TRAILS = 30
 
 
 def random_seed_generator(seed=2):
@@ -66,7 +66,6 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=NUM_SEED_TRAILS, mon
         our_frames.append(frames)
         our_env_seeds.append(env_seed)
         print('ID: ' + str(m_id) + ' run: ' + str(n), flush=True)
-
 
     csv_path = new_folder + '/test_seed_' + str(m_id) + '.csv'
     pd.DataFrame(
@@ -144,6 +143,21 @@ def main():
                       config=config,
                       m_id=m_id,
                       env_seed=np.int(df.iloc[i]['tournament_env_seed']))
+        else:
+            print('ID not in seed dict')
+
+    # create csv fpr top ids
+    files = glob.glob('**/test_seed_*')
+    df_list = []
+    for f in files:
+        temp_df = pd.read_csv(f)
+        temp_df['id'] = f.split('.')[0]
+        temp_df['run'] = False
+        temp_df['run'][0] = True
+        df_list.append(temp_df)
+    df = pd.concat(df_list).sort_values('reward', ascending=False)
+    csv_path = 'top_seeds.csv'
+    df.to_csv(csv_path, index=False)
 
 
 if __name__ == "__main__":
