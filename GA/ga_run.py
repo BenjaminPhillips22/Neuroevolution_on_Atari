@@ -122,7 +122,7 @@ def main():
         tournament_frames = []
         tournament_ids = []
         tournament_tournament_number = []
-        
+
         # select individuals for tournament
         random.seed(next(config['get_seed']))
         tournament_indices = random.sample(population=range(config['population_size']), k=config['tournament_size'])
@@ -159,8 +159,8 @@ def main():
 
         # save the winner
         tournament_indices_winner = tournament_indices[tournament_index_of_max_reward]
-        tournament_winning_seed_dicts[population[tournament_indices_winner].id] = population[tournament_indices_winner].seed_dict
-        
+        tournament_winning_seed_dicts[population[tournament_indices_winner].id] = copy.deepcopy(population[tournament_indices_winner].seed_dict)
+
         # the not-winners take the dna of the winner
         for i in tournament_indices:
             if i == tournament_indices_winner:
