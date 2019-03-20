@@ -4,6 +4,7 @@ Will have to update code if using winners from ga_rerun.py
 """
 
 import os
+import sys
 import json
 import time
 import seaborn as sns
@@ -17,8 +18,8 @@ import atari_model
 
 
 # Global Variables
-NUM_SEEDS_TO_CHECK = 1
-NUM_SEED_TRAILS = 1
+NUM_SEEDS_TO_CHECK = 6
+NUM_SEED_TRAILS = 5
 
 
 def random_seed_generator(seed=2):
@@ -93,14 +94,14 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=NUM_SEED_TRAILS, mon
                                                         output_fn=new_folder)
 
 
-def main():
+def main(f_name):
 
     print("Does it generalise!?!?")
 
     # FOLDER_NAME = 'v/frostbite-experiment-1550464143.200036'
 
     # open json
-    f_name = 'ga_frostbite.json'
+    # f_name = 'ga_frostbite.json'
     with open(f_name) as f:
         config = json.load(f)
 
@@ -162,4 +163,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])
