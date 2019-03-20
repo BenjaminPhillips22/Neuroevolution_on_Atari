@@ -263,4 +263,4 @@ def main(f_name):
 
 
 if __name__ == "__main__":
-    main(str(sys.argv[1]))
+    main(sys.argv[1])
