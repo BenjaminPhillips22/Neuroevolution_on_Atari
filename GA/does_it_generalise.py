@@ -18,8 +18,8 @@ import atari_model
 
 
 # Global Variables
-NUM_SEEDS_TO_CHECK = 6
-NUM_SEED_TRAILS = 5
+NUM_SEEDS_TO_CHECK = 1
+NUM_SEED_TRAILS = 1
 
 
 def random_seed_generator(seed=2):
@@ -131,6 +131,10 @@ def main(f_name):
     for f in files:
         df_list.append(pd.read_csv(f))
     df = pd.concat(df_list).sort_values('reward', ascending=False)
+
+    # save top results from run
+    csv_path = 'top_result_from_run.csv'
+    df.iloc[0:30].to_csv(csv_path)
 
     # check generalisability for top __
     checked_ids = []
