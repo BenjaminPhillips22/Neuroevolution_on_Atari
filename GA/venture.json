@@ -1,13 +1,14 @@
 {
     "name": "Ben's Cool GA JSON",
-    "env": "Frostbite-v4",
+    "env": "Venture-v4",
     "max_frames": 1e8,
     "max_frames_per_episode": 20000,
-    "output_fname": "v/frostbite-experiment-",
+    "output_fname": "v/venture-experiment-",
     "run_number": 0,
     "run_seed": 3001,
     "mutation_rate": 0.05,
     "sigma": 0.005,
     "population_size": 300,
-    "tournament_size": 30
+    "tournament_size": 30,
+    "notes": "I think it would work, but may be disadvanged by the end after 0 reward and lose of life rule :)"
 }
