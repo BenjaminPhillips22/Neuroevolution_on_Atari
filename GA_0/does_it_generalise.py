@@ -156,7 +156,8 @@ def main(f_name):
 
     # check generalisability for top __
     checked_ids = []
-    for i in range(NUM_SEEDS_TO_CHECK):
+    num_to_check = np.min([NUM_SEEDS_TO_CHECK, df.shape[0]])
+    for i in range(num_to_check):
 
         m_id = df.iloc[i]['id']
 

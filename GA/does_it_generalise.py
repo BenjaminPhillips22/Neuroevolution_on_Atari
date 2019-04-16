@@ -1,12 +1,25 @@
 """
 Run the seeds through their paces.
-Will have to update code if using winners from ga_rerun.py
+Takes the json file that was edited to include folder address,
+so no need to copy and paste annoying folder names.
+
+This will output several files in the folder specified in the json;
+
+top_results_from_run.csv - top seeds and details from the runs.
+
+mean_reward.csv - mean reward of NUM_SEED_TRAILS trails to estimate true fitness.
+
+A new folder named after the id, containing trail results for
+that seed and a box plot for the reward. Also, if it is the first seed
+checked (ie highest performing), than a mp4 will be made of that game.
+seed_*.png
+test_seed_*.csv
 """
 
 import os
 import sys
 import json
-import time
+# import time
 import seaborn as sns
 import numpy as np
 import pandas as pd
@@ -18,8 +31,8 @@ import atari_model
 
 
 # Global Variables
-NUM_SEEDS_TO_CHECK = 1
-NUM_SEED_TRAILS = 1
+NUM_SEEDS_TO_CHECK = 50
+NUM_SEED_TRAILS = 30
 
 
 def random_seed_generator(seed=2):
@@ -76,7 +89,7 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=NUM_SEED_TRAILS, mon
             'frames': our_frames
         }
         ).to_csv(csv_path, index=False)
-    
+
     # save boxplot of results
     ax = sns.boxplot(data=our_rewards, color="lightblue")
     ax = sns.swarmplot(data=our_rewards, color=".1")
@@ -92,6 +105,8 @@ def test_seed(seed_dict, config, m_id, env_seed, num_trails=NUM_SEED_TRAILS, mon
         reward, frames, env_seed = model.evaluate_model(monitor=True,
                                                         set_env_seed=best_seed,
                                                         output_fn=new_folder)
+
+    return np.mean(our_rewards)
 
 
 def main(f_name):
@@ -136,23 +151,36 @@ def main(f_name):
     csv_path = 'top_result_from_run.csv'
     df.iloc[0:30].to_csv(csv_path)
 
+    # list to store estimated mean reward
+    mean_rewards = []
+
     # check generalisability for top __
     checked_ids = []
-    for i in range(NUM_SEEDS_TO_CHECK):
+    num_to_check = np.min([NUM_SEEDS_TO_CHECK, df.shape[0]])
+    for i in range(num_to_check):
+
         m_id = df.iloc[i]['id']
+
         if m_id in checked_ids:
             print("Already checked this ID")
             pass
+
         elif m_id in tournament_winning_seed_dicts.keys():
+
             checked_ids.append(m_id)
-            test_seed(seed_dict=tournament_winning_seed_dicts[m_id],
-                      config=config,
-                      m_id=m_id,
-                      env_seed=np.int(df.iloc[i]['tournament_env_seed']))
+
+            # monitor is True for first id only
+            mean_rewards.append(
+                test_seed(seed_dict=tournament_winning_seed_dicts[m_id],
+                          config=config,
+                          m_id=m_id,
+                          env_seed=np.int(df.iloc[i]['tournament_env_seed']),
+                          monitor=(len(checked_ids) == 1))
+            )
         else:
             print('ID not in seed dict')
 
-    # create csv fpr top ids
+    # create csv for top ids
     files = glob.glob('**/test_seed_*')
     df_list = []
     for f in files:
@@ -164,6 +192,15 @@ def main(f_name):
     df = pd.concat(df_list).sort_values('reward', ascending=False)
     csv_path = 'top_seeds.csv'
     df.to_csv(csv_path, index=False)
+
+    # create csv for mean rewards
+    csv_path = 'mean_reward.csv'
+    pd.DataFrame(
+        {
+            'id': checked_ids,
+            'reward': mean_rewards,
+        }
+        ).sort_values('reward', ascending=False).to_csv(csv_path, index=False)
 
 
 if __name__ == "__main__":
