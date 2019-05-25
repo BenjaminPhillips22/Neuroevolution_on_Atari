@@ -1,5 +1,5 @@
 """
-Run the genetic algorithm
+Run the genetic algorithm with crossover
 """
 
 import os
