@@ -2,6 +2,8 @@
 
 Run Neuroevolution algorithms to train neural networks to play atari games.
 
-![alt text](videos/assault - openaigym.video.4.12036.video000000.mp4)
+It's not quite super human, but it's a start.
+
+![alt text](assault.gif)
 
 <br>
