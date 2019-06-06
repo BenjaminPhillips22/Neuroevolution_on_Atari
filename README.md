@@ -16,7 +16,8 @@ It's not quite super human, but it's a start.
 <br>
 <br>
 
-### To Run
+### How To Run The Genetic Algorithm
+
 
 Go into the GA or GA_0 directory, open Bash and type
 
@@ -25,7 +26,8 @@ Go into the GA or GA_0 directory, open Bash and type
 to run the GA to learn how to play frostbite. `frostbite.json` will be updated. Frostbite can 
 be replaced with other jsons for different games. The json file has the hyper-parameters 
 for the algorithm. `does_it_generalise.py` can be used to create videos of the top 
-performing individuals from the run. Type
+performing individuals from the run (thought you may want to update the settings 
+in the file). Type
 
 `python does_it_generalise.py frostbite.json`
 
